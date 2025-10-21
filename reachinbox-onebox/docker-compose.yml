@@ -1,0 +1,42 @@
+﻿version: '3.9'
+services:
+  backend:
+    container_name: onebox-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'
+    environment:
+      - PORT=5000
+    depends_on:
+      - elasticsearch
+
+  frontend:
+    container_name: onebox-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
+
+  elasticsearch:
+    container_name: onebox-elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - '9200:9200'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+volumes:
+  esdata:
